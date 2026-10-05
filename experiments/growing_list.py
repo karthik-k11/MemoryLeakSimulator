@@ -1,5 +1,8 @@
+from memory_monitor import get_memory_usage_mb
+
+
 def create_growing_list(iterations, measurement_interval):
-    """Create a list gradually and record its size at intervals."""
+    """Create a list gradually and record memory usage at intervals."""
 
     items = []
     measurements = []
@@ -12,6 +15,7 @@ def create_growing_list(iterations, measurement_interval):
                 {
                     "iteration": iteration,
                     "item_count": len(items),
+                    "memory_mb": get_memory_usage_mb(),
                 }
             )
 
