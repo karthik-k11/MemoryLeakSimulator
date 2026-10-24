@@ -1,10 +1,11 @@
+
 import os
 
 import psutil
 
 
 def get_memory_usage_mb():
-    """Return current process RSS memory usage in megabytes."""
+    """Return the current Python process's resident memory usage in MB."""
     process = psutil.Process(os.getpid())
     memory_bytes = process.memory_info().rss
 
