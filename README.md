@@ -20,7 +20,7 @@ MemoryLeak Simulator is a lightweight, local web application for exploring Pytho
 
 The diagram illustrates how MemoryLeakSimulator runs bounded memory experiments, records RSS measurements, analyzes memory growth, and stores results in a local SQLite database for later review.
 
-![MemoryLeakSimulator Workflow Architecture](screenshots/memoryleaksimulator-workflow.png)
+![MemoryLeakSimulator Workflow Architecture](screenshots/memoryleaksimulator-workflow..png)
 
 ## Screenshots
 
@@ -214,3 +214,4 @@ The duration and memory checks are best-effort application-level guardrails. The
 - Inspect garbage-collection statistics.
 - Export experiment results to CSV.
 - Add more controlled workload patterns.
+---
