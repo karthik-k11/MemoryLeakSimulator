@@ -1,0 +1,146 @@
+
+{% extends "base.html" %}
+
+{% block title %}MemoryLeak Simulator · Experiments{% endblock %}
+
+{% block content %}
+<section class="intro">
+    <p class="eyebrow">EXPERIMENT WORKSPACE</p>
+
+    <h1>Understand memory behaviour.</h1>
+
+    <p class="muted">
+        Run a bounded list or dictionary workload, inspect its memory
+        timeline, and keep a local history of results.
+    </p>
+</section>
+
+{% if error %}
+<div class="alert" role="alert">{{ error }}</div>
+{% endif %}
+
+<section class="panel">
+    <div class="panel-heading">
+        <div>
+            <h2>New experiment</h2>
+            <p class="muted small">
+                Workloads are capped to keep runs lightweight.
+            </p>
+        </div>
+    </div>
+
+    <form action="{{ url_for('run') }}" method="post" class="form-grid">
+        <label for="workload">Workload
+            <select name="workload" id="workload">
+                <option value="list">Growing List</option>
+                <option value="dict">Growing Dictionary</option>
+            </select>
+        </label>
+
+        <label for="iterations">
+            Iterations (maximum {{ "{:,}".format(max_iterations) }})
+            <input
+                type="number"
+                name="iterations"
+                id="iterations"
+                min="1"
+                max="{{ max_iterations }}"
+                value="10000"
+                required
+            >
+        </label>
+
+        <label for="measurement_interval">
+            Measurement interval
+            <input
+                type="number"
+                name="measurement_interval"
+                id="measurement_interval"
+                min="1"
+                value="{{ default_interval }}"
+                required
+            >
+        </label>
+
+        <div class="form-action">
+            <button type="submit">
+                Run experiment <span aria-hidden="true">→</span>
+            </button>
+        </div>
+    </form>
+
+    <p class="fine-print">
+        Duration and memory guardrails are best-effort application checks,
+        not operating-system guarantees.
+    </p>
+</section>
+
+<section class="section-head">
+    <div>
+        <p class="eyebrow">LOCAL DATABASE</p>
+        <h2>Recent experiments</h2>
+    </div>
+</section>
+
+{% if history %}
+<div class="table-wrap">
+    <table>
+        <thead>
+            <tr>
+                <th>Run</th>
+                <th>Workload</th>
+                <th>Completed</th>
+                <th>Memory growth</th>
+                <th>Duration</th>
+                <th></th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for item in history %}
+            <tr>
+                <td class="mono">
+                    #{{ item.id }}
+                    <span class="subcell">
+                        {{ item.created_at[:19].replace('T', ' ') }} UTC
+                    </span>
+                </td>
+
+                <td>
+                    {{ "Growing List" if item.workload == "list"
+                       else "Growing Dictionary" }}
+                </td>
+
+                <td>
+                    {{ "{:,}".format(item.iterations_completed) }}
+                    /
+                    {{ "{:,}".format(item.iterations_requested) }}
+                </td>
+
+                <td class="{{ 'positive' if item.memory_growth_mb >= 0
+                             else 'negative' }}">
+                    {{ "%+.3f"|format(item.memory_growth_mb) }} MB
+                </td>
+
+                <td>{{ "%.4f"|format(item.duration_seconds) }} s</td>
+
+                <td>
+                    <a
+                        class="text-link"
+                        href="{{ url_for('detail', experiment_id=item.id) }}"
+                    >
+                        View result →
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="empty-state">
+    <h3>No experiments yet</h3>
+    <p>Your first run will appear here with its timeline and summary.</p>
+</div>
+{% endif %}
+{% endblock %}

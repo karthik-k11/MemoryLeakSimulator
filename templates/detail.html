@@ -1,0 +1,139 @@
+
+{% extends "base.html" %}
+
+{% block title %}
+Experiment #{{ experiment.id }} · MemoryLeak Simulator
+{% endblock %}
+
+{% block content %}
+<a class="back-link" href="{{ url_for('index') }}">
+    ← All experiments
+</a>
+
+<section class="intro compact">
+    <p class="eyebrow">EXPERIMENT #{{ experiment.id }}</p>
+
+    <h1>{{ "Growing List" if experiment.workload == "list"
+           else "Growing Dictionary" }}</h1>
+
+    <p class="muted">
+        {{ experiment.created_at[:19].replace('T', ' ') }} UTC
+        ·
+        {{ "{:,}".format(experiment.iterations_completed) }}
+        iterations completed
+    </p>
+</section>
+
+<section class="metrics">
+    <div class="metric">
+        <span>Initial RSS</span>
+        <strong>
+            {{ "%.2f"|format(experiment.initial_memory_mb) }}
+            <small>MB</small>
+        </strong>
+    </div>
+
+    <div class="metric">
+        <span>Peak RSS</span>
+        <strong>
+            {{ "%.2f"|format(experiment.peak_memory_mb) }}
+            <small>MB</small>
+        </strong>
+    </div>
+
+    <div class="metric">
+        <span>Final RSS</span>
+        <strong>
+            {{ "%.2f"|format(experiment.final_memory_mb) }}
+            <small>MB</small>
+        </strong>
+    </div>
+
+    <div class="metric">
+        <span>Memory growth</span>
+        <strong>
+            {{ "%+.3f"|format(experiment.memory_growth_mb) }}
+            <small>MB</small>
+        </strong>
+    </div>
+</section>
+
+<section class="panel">
+    <div class="panel-heading">
+        <div>
+            <h2>Memory timeline</h2>
+            <p class="muted small">
+                Process resident set size (RSS) at each sample
+            </p>
+        </div>
+
+        <span class="tag">
+            {{ experiment.measurements|length }} samples
+        </span>
+    </div>
+
+    <div class="chart">
+        {{ chart|safe }}
+    </div>
+
+    <p class="fine-print">
+        RSS includes Python runtime and other process memory.
+        Allocator behaviour and operating-system reporting can make it
+        fluctuate. Memory growth alone does not prove a memory leak.
+    </p>
+</section>
+
+<section class="panel">
+    <div class="panel-heading">
+        <div>
+            <h2>Measurements</h2>
+            <p class="muted small">
+                Recorded item count and RSS for each sample
+            </p>
+        </div>
+    </div>
+
+    <div class="table-wrap inner-table">
+        <table>
+            <thead>
+                <tr>
+                    <th>Iteration</th>
+                    <th>Items</th>
+                    <th>RSS memory</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for sample in experiment.measurements %}
+                <tr>
+                    <td>{{ "{:,}".format(sample.iteration) }}</td>
+                    <td>{{ "{:,}".format(sample.item_count) }}</td>
+                    <td>{{ "%.3f"|format(sample.memory_mb) }} MB</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="run-meta">
+        <span>
+            Duration
+            <strong>{{ "%.4f"|format(experiment.duration_seconds) }} s</strong>
+        </span>
+
+        <span>
+            Requested
+            <strong>
+                {{ "{:,}".format(experiment.iterations_requested) }}
+            </strong>
+        </span>
+
+        <span>
+            Completed
+            <strong>
+                {{ "{:,}".format(experiment.iterations_completed) }}
+            </strong>
+        </span>
+    </div>
+</section>
+{% endblock %}
